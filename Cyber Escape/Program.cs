@@ -7,7 +7,7 @@ namespace Cyber_Escape
         [STAThread]
         static void Main()
         {
-            using (var game = new Game1())
+            using (var game = new CyberEscape())
                 game.Run();
         }
     }
