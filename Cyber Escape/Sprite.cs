@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Cat_Run_Infinite
+namespace Cyber_Escape
 {
     /// <summary>
     /// Defines a base class that all sprites inherit

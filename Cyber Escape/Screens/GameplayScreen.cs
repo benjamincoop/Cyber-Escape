@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,34 +14,59 @@ namespace Cyber_Escape.Screens
     // put some more interesting gameplay in here!
     public class GameplayScreen : GameScreen
     {
-        private ContentManager _content;
-        private SpriteFont _gameFont;
+        private ContentManager content;
 
-        //private Texture2D _background;
-        private Vector2 _playerPosition = new Vector2(100, 100);
+        private float pauseAlpha;
+        private readonly InputAction pauseAction;
+        private readonly InputAction advanceAction;
+        private Random random = new Random();
 
-        private float _pauseAlpha;
-        private readonly InputAction _pauseAction;
+        private Texture2D[] portalTextures;
+        private List<Portal> portals = new List<Portal>();
+        private const int numPortals = 2;
 
         public GameplayScreen()
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
-            _pauseAction = new InputAction(
+            pauseAction = new InputAction(
                 new[] { Buttons.Start, Buttons.Back },
                 new[] { Keys.Back, Keys.Escape }, true);
+
+            advanceAction = new InputAction(
+                new[] { Buttons.A, Buttons.B },
+                new[] { Keys.Enter, Keys.Space }, true);
         }
 
         // Load graphics content for the game
         public override void Activate()
         {
-            if (_content == null)
-                _content = new ContentManager(ScreenManager.Game.Services, "Content");
+            if (content == null) content = new ContentManager(ScreenManager.Game.Services, "Content");
 
-            _gameFont = _content.Load<SpriteFont>("gamefont");
+            portalTextures = new Texture2D[]
+            {
+                content.Load<Texture2D>("portal0"),
+                content.Load<Texture2D>("portal1"),
+                content.Load<Texture2D>("portal2"),
+                content.Load<Texture2D>("portal3"),
+                content.Load<Texture2D>("portal4"),
+                content.Load<Texture2D>("portal5"),
+                content.Load<Texture2D>("portal6"),
+                content.Load<Texture2D>("portal7"),
+                content.Load<Texture2D>("portal8"),
+                content.Load<Texture2D>("portal9"),
+                content.Load<Texture2D>("portal10"),
+                content.Load<Texture2D>("portal11"),
+                content.Load<Texture2D>("portal12"),
+                content.Load<Texture2D>("portal13"),
+                content.Load<Texture2D>("portal14"),
+                content.Load<Texture2D>("portal15")
+            };
 
-            //_background = _content.Load<Texture2D>("village_BG");
+            // Add starting portal and activate it.
+            portals.Add(SpawnPortal());
+            portals[portals.Count - 1].IsActive = true;
 
             // once the load has finished, we use ResetElapsedTime to tell the game's
             // timing mechanism that we have just finished a very long frame, and that
@@ -56,7 +82,7 @@ namespace Cyber_Escape.Screens
 
         public override void Unload()
         {
-            _content.Unload();
+            content.Unload();
         }
 
         // This method checks the GameScreen.IsActive property, so the game will
@@ -68,20 +94,14 @@ namespace Cyber_Escape.Screens
             // Gradually fade in or out depending on whether we are covered by the pause screen.
             if (coveredByOtherScreen)
             {
-                _pauseAlpha = Math.Min(_pauseAlpha + 1f / 32, 1);
+                pauseAlpha = Math.Min(pauseAlpha + 1f / 32, 1);
             }
             else
             {
-                _pauseAlpha = Math.Max(_pauseAlpha - 1f / 32, 0);
+                pauseAlpha = Math.Max(pauseAlpha - 1f / 32, 0);
             }
 
-            if (IsActive)
-            {
-                if(_playerPosition.X < 0 || _playerPosition.X > Constants.GAME_WIDTH)
-                {
-                    //LoadingScreen.Load(ScreenManager, true, 0, new ForestStageScreen());
-                }
-            }
+            foreach (Portal portal in portals) portal.Update();
         }
 
         // Unlike the Update method, this will only be called when the gameplay screen is active.
@@ -103,58 +123,58 @@ namespace Cyber_Escape.Screens
             bool gamePadDisconnected = !gamePadState.IsConnected && input.GamePadWasConnected[playerIndex];
 
             PlayerIndex player;
-            if (_pauseAction.Occurred(input, ControllingPlayer, out player) || gamePadDisconnected)
+            if (pauseAction.Occurred(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
-            else
+            if (advanceAction.Occurred(input, ControllingPlayer, out player))
             {
-                // Otherwise move the player position.
-                var movement = Vector2.Zero;
-
-                if (keyboardState.IsKeyDown(Keys.Left))
-                    movement.X--;
-
-                if (keyboardState.IsKeyDown(Keys.Right))
-                    movement.X++;
-
-                if (keyboardState.IsKeyDown(Keys.Up))
-                    movement.Y--;
-
-                if (keyboardState.IsKeyDown(Keys.Down))
-                    movement.Y++;
-
-                var thumbstick = gamePadState.ThumbSticks.Left;
-
-                movement.X += thumbstick.X;
-                movement.Y -= thumbstick.Y;
-
-                if (movement.Length() > 1)
-                    movement.Normalize();
-
-                _playerPosition += movement * 8f;
+                // deactivate portal
+                portals[portals.Count - 1].IsActive = false;
+                // spawn a new portal at the top of the screen
+                portals.Add(SpawnPortal());
+                // activate new portal
+                portals[portals.Count - 1].IsActive = true;
+                // slide each portal downward
+                foreach (Portal portal in portals.ToArray())
+                {
+                    portal.Slide();
+                    // if a portal is off the screen, we can remove the reference to it.
+                    if(portal.Position.Y > Constants.GAME_HEIGHT)
+                    {
+                        portals.Remove(portal);
+                        //break;
+                    }
+                }
             }
+        }
+
+        private Portal SpawnPortal()
+        {
+            //Vector2 pos = new Vector2(random.Next(0, Constants.GAME_WIDTH), (Constants.GAME_HEIGHT / (numPortals + 1)) * (numPortals - portalCount));
+            Vector2 pos = new Vector2(random.Next(0, Constants.GAME_WIDTH), 0);
+            return new Portal(pos, portalTextures);
         }
 
         public override void Draw(GameTime gameTime)
         {
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
 
-            // Our player and enemy are both actually just text strings.
             var spriteBatch = ScreenManager.SpriteBatch;
 
             spriteBatch.Begin();
 
-            //spriteBatch.Draw(_background, Vector2.Zero, Color.White);
-
-            spriteBatch.DrawString(_gameFont, "// TODO", _playerPosition, Color.Green);
-
+            foreach(Portal portal in portals)
+            {
+                spriteBatch.Draw(portal.CurrentTexture, portal.Position, null, portal.ShadingColor, portal.Rotation, new Vector2(64, 64), portal.ScaleFactor, SpriteEffects.None, 0);
+            }
+            
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.
-            if (TransitionPosition > 0 || _pauseAlpha > 0)
+            if (TransitionPosition > 0 || pauseAlpha > 0)
             {
-                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, _pauseAlpha / 2);
+                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, pauseAlpha / 2);
 
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
