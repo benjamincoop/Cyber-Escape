@@ -25,6 +25,14 @@ namespace Cyber_Escape.Screens
         private List<Portal> portals = new List<Portal>();
         private const int numPortals = 2;
 
+        private Texture2D orbTexture;
+        private List<Orb> orbs = new List<Orb>();
+
+        private Texture2D playerTexture;
+        private Player player;
+
+        private bool isAdvancing = false;
+
         public GameplayScreen()
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
@@ -64,9 +72,14 @@ namespace Cyber_Escape.Screens
                 content.Load<Texture2D>("portal15")
             };
 
-            // Add starting portal and activate it.
+            orbTexture = content.Load<Texture2D>("orb_red");
+
+            // Add starting portal
             portals.Add(SpawnPortal());
-            portals[portals.Count - 1].IsActive = true;
+
+            playerTexture = content.Load<Texture2D>("orb_blue");
+
+            player = new Player(playerTexture, new Vector2(Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT));
 
             // once the load has finished, we use ResetElapsedTime to tell the game's
             // timing mechanism that we have just finished a very long frame, and that
@@ -102,6 +115,38 @@ namespace Cyber_Escape.Screens
             }
 
             foreach (Portal portal in portals) portal.Update();
+            foreach (Orb orb in orbs) orb.Update(gameTime);
+            player.Update(gameTime);
+
+            // Indicates player has finished moving and we are ready to advance the level
+            if(isAdvancing && player.IsMoving == false)
+            {
+                isAdvancing = false;
+
+                // deactivate portal
+                portals[portals.Count - 1].IsActive = false;
+                // spawn a new portal at the top of the screen
+                portals.Add(SpawnPortal());
+                // add orb(s) to new portal
+                orbs.Add(SpawnOrb(portals[portals.Count - 1]));
+
+                // slide down and remove offscreen sprites
+                foreach (Portal portal in portals.ToArray())
+                {
+                    portal.Slide();
+                    if (portal.Position.Y > Constants.GAME_HEIGHT)
+                    {
+                        portals.Remove(portal);
+                    }
+                }
+                foreach (Orb orb in orbs.ToArray())
+                {
+                    if (orb.Position.Y > Constants.GAME_HEIGHT)
+                    {
+                        orbs.Remove(orb);
+                    }
+                }
+            }
         }
 
         // Unlike the Update method, this will only be called when the gameplay screen is active.
@@ -129,22 +174,10 @@ namespace Cyber_Escape.Screens
             }
             if (advanceAction.Occurred(input, ControllingPlayer, out player))
             {
-                // deactivate portal
-                portals[portals.Count - 1].IsActive = false;
-                // spawn a new portal at the top of the screen
-                portals.Add(SpawnPortal());
-                // activate new portal
-                portals[portals.Count - 1].IsActive = true;
-                // slide each portal downward
-                foreach (Portal portal in portals.ToArray())
+                if(isAdvancing == false && portals[portals.Count - 1].IsSliding == false)
                 {
-                    portal.Slide();
-                    // if a portal is off the screen, we can remove the reference to it.
-                    if(portal.Position.Y > Constants.GAME_HEIGHT)
-                    {
-                        portals.Remove(portal);
-                        //break;
-                    }
+                    isAdvancing = true;
+                    this.player.Advance(portals[portals.Count - 1], 2000f);
                 }
             }
         }
@@ -153,7 +186,14 @@ namespace Cyber_Escape.Screens
         {
             //Vector2 pos = new Vector2(random.Next(0, Constants.GAME_WIDTH), (Constants.GAME_HEIGHT / (numPortals + 1)) * (numPortals - portalCount));
             Vector2 pos = new Vector2(random.Next(0, Constants.GAME_WIDTH), 0);
-            return new Portal(pos, portalTextures);
+            Portal portal = new Portal(pos, portalTextures);
+            portal.IsActive = true;
+            return portal;
+        }
+
+        private Orb SpawnOrb(Portal portal)
+        {
+            return new Orb(orbTexture, portal, 200f, 5f);
         }
 
         public override void Draw(GameTime gameTime)
@@ -168,7 +208,14 @@ namespace Cyber_Escape.Screens
             {
                 spriteBatch.Draw(portal.CurrentTexture, portal.Position, null, portal.ShadingColor, portal.Rotation, new Vector2(64, 64), portal.ScaleFactor, SpriteEffects.None, 0);
             }
-            
+
+            foreach(Orb orb in orbs)
+            {
+                spriteBatch.Draw(orb.CurrentTexture, orb.Position, null, orb.ShadingColor, orb.Rotation, new Vector2(24, 24), orb.ScaleFactor, SpriteEffects.None, 0);
+            }
+
+            spriteBatch.Draw(player.CurrentTexture, player.Position, null, player.ShadingColor, player.Rotation, new Vector2(24, 24), player.ScaleFactor, SpriteEffects.None, 0);
+
             spriteBatch.End();
 
             // If the game is transitioning on or off, fade it out to black.

@@ -8,7 +8,7 @@ namespace Cyber_Escape
     {
         private Animation animation;
         public bool IsActive = false;
-        private bool isSlidingDown = true;
+        public bool IsSliding = true;
         private float oldPosition;
 
         /// <summary>
@@ -33,21 +33,21 @@ namespace Cyber_Escape
                 Rotation += 0.1f;
             }
 
-            if(isSlidingDown)
+            if(IsSliding)
             {
                 Position = new Vector2(Position.X, Position.Y + 18);
                 if(Position.Y >= oldPosition + 540)
                 {
-                    isSlidingDown = false;
+                    IsSliding = false;
                 }
             }
         }
 
         public void Slide()
         {
-            if(isSlidingDown == false)
+            if(IsSliding == false)
             {
-                isSlidingDown = true;
+                IsSliding = true;
                 oldPosition = Position.Y;
             }
         }
