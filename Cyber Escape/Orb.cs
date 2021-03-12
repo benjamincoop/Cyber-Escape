@@ -6,6 +6,8 @@ namespace Cyber_Escape
 {
     class Orb : Sprite
     {
+        public BoundingCircle bounds;
+
         // The portal about which the orb orbits
         private Portal portal;
 
@@ -21,16 +23,15 @@ namespace Cyber_Escape
         // The orbs current direction
         private float angle;
 
-
-
-        public Orb(Texture2D texture, Portal portal, float radius, float speed)
+        public Orb(Texture2D texture, Portal portal, float radius, float speed, float startAngle)
         {
+            bounds = new BoundingCircle(Vector2.Zero, 16f);
             CurrentTexture = texture;
             this.portal = portal;
             Position = portal.Position;
             this.radius = radius;
             this.speed = speed;
-            angle = 0f;
+            angle = startAngle;
         }
 
         public void Update(GameTime gameTime)
@@ -40,12 +41,6 @@ namespace Cyber_Escape
                 // Set the orb's inital position to that of the portal
                 Position = portal.Position;
                 center = Position;
-
-                // Find the location of the center of the portal
-                //center = new Vector2(
-                //    Position.X + (portal.CurrentTexture.Width / 2),
-                //    Position.Y + (portal.CurrentTexture.Height / 2)
-                //);
 
                 // Calculate the new angle of rotation
                 angle += speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -57,11 +52,14 @@ namespace Cyber_Escape
                 ) * radius;
 
                 Position = center + offset;
+
             } else
             {
                 // If attached portal is inactive, move orb off screen so it can be garbage collected.
                 Position = new Vector2(Constants.GAME_HEIGHT + 1, Constants.GAME_WIDTH + 1);
             }
+            // Update position of bounding circle
+            bounds.Center = Position;
         }
     }
 }

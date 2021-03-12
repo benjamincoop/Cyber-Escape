@@ -33,6 +33,8 @@ namespace Cyber_Escape.Screens
 
         private bool isAdvancing = false;
 
+        private int difficulty = 0;
+
         public GameplayScreen()
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
@@ -115,7 +117,14 @@ namespace Cyber_Escape.Screens
             }
 
             foreach (Portal portal in portals) portal.Update();
-            foreach (Orb orb in orbs) orb.Update(gameTime);
+            foreach (Orb orb in orbs)
+            {
+                orb.Update(gameTime);
+                if(orb.bounds.CollidesWith(player.bounds))
+                {
+                    Thread.Sleep(1000);
+                }
+            }
             player.Update(gameTime);
 
             // Indicates player has finished moving and we are ready to advance the level
@@ -128,7 +137,8 @@ namespace Cyber_Escape.Screens
                 // spawn a new portal at the top of the screen
                 portals.Add(SpawnPortal());
                 // add orb(s) to new portal
-                orbs.Add(SpawnOrb(portals[portals.Count - 1]));
+                SpawnOrbs(portals[portals.Count - 1]);
+                difficulty++;
 
                 // slide down and remove offscreen sprites
                 foreach (Portal portal in portals.ToArray())
@@ -191,9 +201,143 @@ namespace Cyber_Escape.Screens
             return portal;
         }
 
-        private Orb SpawnOrb(Portal portal)
+        private void SpawnOrbs(Portal portal)
         {
-            return new Orb(orbTexture, portal, 200f, 5f);
+            //return new Orb(orbTexture, portal, 200f, 5f, startAngle);
+            switch(difficulty)
+            {
+                case 0:
+                    // 3 orbs, evenly spaced, slow
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 2f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 4f));
+                    break;
+                case 1:
+                    // 4 orbs, line, slow
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 1.0f));
+                    break;
+                case 2:
+                    // 2 lines of 2 orbs, same direction, slow
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 3.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 3.5f));
+                    break;
+                case 3:
+                    // 5 orbs, line, medium speed
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 1.0f));
+                    break;
+                case 4:
+                    // 2 lines of 3 orbs, opposing directions, medium speed
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 3f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 3.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 3.5f));
+                    break;
+                case 5:
+                    // 6 orbs, line, fast
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.25f));
+                    break;
+                case 6:
+                    // 7 orbs, evenly spaced, medium speed
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.67f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 1.33f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 2f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 2.67f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 3.33f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 4f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 4.67f));
+                    break;
+                case 7:
+                    // 2 lines of 4 orbs, opposing directions, fast
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -7.5f, 3f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -7.5f, 3.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -7.5f, 3.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -7.5f, 3.75f));
+                    break;
+                case 8:
+                    // 8 orbs, different speeds and radii
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 2.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.75f));
+                    break;
+                case 9:
+                    // two lines of 8 orbs, opposing directions, different radii, slow and medium speed
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, 7.5f, 1.75f));
+
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, -5f, 1.75f));
+                    break;
+                case 10:
+                    // two lines of 8 orbs, 8 spread evenly, opposing directions, different radii, all speeds
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 1.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 300f, 7.5f, 1.75f));
+
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 0f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 0.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 0.75f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 1.25f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 200f, -5f, 1.75f));
+
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 0.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 1f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 1.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 2f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 2.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 3f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 3.5f));
+                    orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 4f));
+                    break;
+                case 11:
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void Draw(GameTime gameTime)

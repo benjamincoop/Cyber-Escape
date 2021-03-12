@@ -6,6 +6,8 @@ namespace Cyber_Escape
 {
     class Player : Sprite
     {
+        public BoundingCircle bounds;
+
         // variables related to player movement
         public bool IsMoving = false;
         private Vector2 startPosition;
@@ -19,6 +21,7 @@ namespace Cyber_Escape
         {
             CurrentTexture = texture;
             Position = position;
+            bounds = new BoundingCircle(Position, 16f);
         }
 
         public void Update(GameTime gameTime)
@@ -27,6 +30,7 @@ namespace Cyber_Escape
             if(IsMoving)
             {
                 Position += moveDirection * moveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
                 if(Vector2.Distance(startPosition, Position) >= moveDistance)
                 {
                     IsMoving = false;
@@ -38,6 +42,8 @@ namespace Cyber_Escape
                     Position = new Vector2(portal.Position.X + 10, portal.Position.Y + 10);
                 }
             }
+            // Update bounding circle position
+            bounds.Center = Position;
         }
 
         // Start moving player towards portal
