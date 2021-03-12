@@ -25,12 +25,24 @@
 /processorParam:TextureFormat=Color
 /build:blank.png
 
+#begin failSFX.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:failSFX.wav
+
 #begin gamefont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:gamefont.spritefont
+
+#begin GameMusic.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:GameMusic.mp3
 
 #begin gradient.png
 /importer:TextureImporter
@@ -63,6 +75,12 @@
 /processorParam:TextureFormat=Compressed
 /build:menufont.spritefont
 
+#begin MenuMusic.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:MenuMusic.mp3
+
 #begin orb_blue.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -86,6 +104,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:orb_red.png
+
+#begin playerSFX.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:playerSFX.wav
 
 #begin portal0.png
 /importer:TextureImporter

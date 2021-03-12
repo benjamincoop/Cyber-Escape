@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Cyber_Escape.StateManagement;
+using Microsoft.Xna.Framework.Content;
 
 namespace Cyber_Escape.Screens
 {
     // The main menu screen is the first thing displayed when the game starts up.
     public class MainMenuScreen : MenuScreen
     {
-        public MainMenuScreen() : base("Main Menu")
+        public MainMenuScreen() : base("Cyber Escape")
         {
             var playGameMenuEntry = new MenuEntry("Play Game");
             var optionsMenuEntry = new MenuEntry("Options");
@@ -33,7 +34,7 @@ namespace Cyber_Escape.Screens
 
         protected override void OnCancel(PlayerIndex playerIndex)
         {
-            const string message = "Are you sure you want to exit this sample?";
+            const string message = "Are you sure you want to exit?";
             var confirmExitMessageBox = new MessageBoxScreen(message);
 
             confirmExitMessageBox.Accepted += ConfirmExitMessageBoxAccepted;

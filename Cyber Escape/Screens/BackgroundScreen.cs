@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Cyber_Escape.StateManagement;
+using Microsoft.Xna.Framework.Media;
 
 namespace Cyber_Escape.Screens
 {
@@ -11,8 +12,9 @@ namespace Cyber_Escape.Screens
     // of whatever transitions the screens on top of it may be doing.
     public class BackgroundScreen : GameScreen
     {
-        private ContentManager _content;
-        private Texture2D _backgroundTexture;
+        private ContentManager content;
+        private Texture2D backgroundTexture;
+        private Song song;
 
         public BackgroundScreen()
         {
@@ -29,15 +31,19 @@ namespace Cyber_Escape.Screens
         /// </summary>
         public override void Activate()
         {
-            if (_content == null)
-                _content = new ContentManager(ScreenManager.Game.Services, "Content");
+            if (content == null)
+                content = new ContentManager(ScreenManager.Game.Services, "Content");
 
-            _backgroundTexture = _content.Load<Texture2D>("MainMenuBG");
+            backgroundTexture = content.Load<Texture2D>("MainMenuBG");
+
+            song = content.Load<Song>("MenuMusic");
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(song);
         }
 
         public override void Unload()
         {
-            _content.Unload();
+            content.Unload();
         }
 
         // Unlike most screens, this should not transition off even if
@@ -57,7 +63,7 @@ namespace Cyber_Escape.Screens
 
             spriteBatch.Begin();
 
-            spriteBatch.Draw(_backgroundTexture, fullscreen,
+            spriteBatch.Draw(backgroundTexture, fullscreen,
                 new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
 
             spriteBatch.End();

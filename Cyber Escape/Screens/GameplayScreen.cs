@@ -6,12 +6,11 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Cyber_Escape.StateManagement;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace Cyber_Escape.Screens
 {
-    // This screen implements the actual game logic. It is just a
-    // placeholder to get the idea across: you'll probably want to
-    // put some more interesting gameplay in here!
     public class GameplayScreen : GameScreen
     {
         private ContentManager content;
@@ -31,6 +30,10 @@ namespace Cyber_Escape.Screens
         private Texture2D playerTexture;
         private Player player;
 
+        private Song music;
+        private SoundEffect advanceSFX;
+        private SoundEffect failSFX;
+
         private bool isAdvancing = false;
 
         private int difficulty = 0;
@@ -41,6 +44,7 @@ namespace Cyber_Escape.Screens
         private Vector2 messagePos;
 
         private int score = 0;
+        private bool gameOver = false;
 
         public GameplayScreen()
         {
@@ -88,6 +92,13 @@ namespace Cyber_Escape.Screens
 
             playerTexture = content.Load<Texture2D>("orb_blue");
 
+            music = content.Load<Song>("GameMusic");
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(music);
+
+            advanceSFX = content.Load<SoundEffect>("playerSFX");
+            failSFX = content.Load<SoundEffect>("failSFX");
+
             player = new Player(playerTexture, new Vector2(Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT));
 
             gameFont = content.Load<SpriteFont>("gamefont");
@@ -125,58 +136,72 @@ namespace Cyber_Escape.Screens
                 pauseAlpha = Math.Max(pauseAlpha - 1f / 32, 0);
             }
 
-            foreach (Portal portal in portals) portal.Update();
-            foreach (Orb orb in orbs)
+            if(IsActive)
             {
-                orb.Update(gameTime);
-                if(orb.bounds.CollidesWith(player.bounds))
+                if (gameOver)
                 {
-                    Thread.Sleep(1000);
-                }
-            }
-            player.Update(gameTime);
-
-            // Indicates player has finished moving and we are ready to advance the level
-            if(isAdvancing && player.IsMoving == false)
-            {
-                isAdvancing = false;
-                score += 100;
-
-                // deactivate portal
-                portals[portals.Count - 1].IsActive = false;
-                // spawn a new portal at the top of the screen
-                portals.Add(SpawnPortal());
-                // add orb(s) to new portal
-                SpawnOrbs(portals[portals.Count - 1]);
-                if(tutorialComplete)
-                {
-                    difficulty = random.Next(3, 11);
-                } else
-                {
-                    difficulty++;
+                    ExitScreen();
+                    LoadingScreen.Load(ScreenManager, true, 0, new GameplayScreen());
                 }
 
-                // slide down and remove offscreen sprites
-                foreach (Portal portal in portals.ToArray())
+                foreach (Portal portal in portals) portal.Update();
+                foreach (Orb orb in orbs)
                 {
-                    portal.Slide();
-                    if (portal.Position.Y > Constants.GAME_HEIGHT)
+                    orb.Update(gameTime);
+                    if (orb.bounds.CollidesWith(player.bounds) && gameOver == false)
                     {
-                        portals.Remove(portal);
+                        failSFX.Play();
+                        gameOver = true;
+                        ScreenManager.AddScreen(new MessageBoxScreen("Game over!\nPress 'enter' to restart.", false), ControllingPlayer);
+                        return;
                     }
                 }
-                foreach (Orb orb in orbs.ToArray())
+                player.Update(gameTime);
+
+                // Indicates player has finished moving and we are ready to advance the level
+                if (isAdvancing && player.IsMoving == false)
                 {
-                    if (orb.Position.Y > Constants.GAME_HEIGHT)
+                    isAdvancing = false;
+                    score += 100;
+
+                    // deactivate portal
+                    portals[portals.Count - 1].IsActive = false;
+                    // spawn a new portal at the top of the screen
+                    portals.Add(SpawnPortal());
+                    // add orb(s) to new portal
+                    SpawnOrbs(portals[portals.Count - 1]);
+                    if (tutorialComplete)
                     {
-                        orbs.Remove(orb);
+                        difficulty = random.Next(3, 11);
+                    }
+                    else
+                    {
+                        difficulty++;
+                    }
+
+                    // slide down and remove offscreen sprites
+                    foreach (Portal portal in portals.ToArray())
+                    {
+                        portal.Slide();
+                        if (portal.Position.Y > Constants.GAME_HEIGHT)
+                        {
+                            portals.Remove(portal);
+                        }
+                    }
+                    foreach (Orb orb in orbs.ToArray())
+                    {
+                        if (orb.Position.Y > Constants.GAME_HEIGHT)
+                        {
+                            orbs.Remove(orb);
+                        }
                     }
                 }
-            } else
-            {
-                if(isAdvancing == false && player.IsMoving == false && difficulty >= 2 && score > 0)
+                else
                 {
-                    score -= 1;
+                    if (portals[portals.Count - 1].IsSliding == false && player.IsMoving == false && difficulty >= 2 && score > 0)
+                    {
+                        score -= 1;
+                    }
                 }
             }
         }
@@ -202,6 +227,7 @@ namespace Cyber_Escape.Screens
             PlayerIndex player;
             if (pauseAction.Occurred(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
+                Deactivate();
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
             }
             if (advanceAction.Occurred(input, ControllingPlayer, out player))
@@ -210,6 +236,7 @@ namespace Cyber_Escape.Screens
                 {
                     isAdvancing = true;
                     this.player.Advance(portals[portals.Count - 1], 2000f);
+                    advanceSFX.Play();
                 }
             }
         }
