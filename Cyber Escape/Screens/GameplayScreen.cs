@@ -34,6 +34,13 @@ namespace Cyber_Escape.Screens
         private bool isAdvancing = false;
 
         private int difficulty = 0;
+        private bool tutorialComplete = false;
+
+        private SpriteFont gameFont;
+        private string messageStr;
+        private Vector2 messagePos;
+
+        private int score = 0;
 
         public GameplayScreen()
         {
@@ -83,6 +90,8 @@ namespace Cyber_Escape.Screens
 
             player = new Player(playerTexture, new Vector2(Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT));
 
+            gameFont = content.Load<SpriteFont>("gamefont");
+
             // once the load has finished, we use ResetElapsedTime to tell the game's
             // timing mechanism that we have just finished a very long frame, and that
             // it should not try to catch up.
@@ -131,6 +140,7 @@ namespace Cyber_Escape.Screens
             if(isAdvancing && player.IsMoving == false)
             {
                 isAdvancing = false;
+                score += 100;
 
                 // deactivate portal
                 portals[portals.Count - 1].IsActive = false;
@@ -138,7 +148,13 @@ namespace Cyber_Escape.Screens
                 portals.Add(SpawnPortal());
                 // add orb(s) to new portal
                 SpawnOrbs(portals[portals.Count - 1]);
-                difficulty++;
+                if(tutorialComplete)
+                {
+                    difficulty = random.Next(3, 11);
+                } else
+                {
+                    difficulty++;
+                }
 
                 // slide down and remove offscreen sprites
                 foreach (Portal portal in portals.ToArray())
@@ -155,6 +171,12 @@ namespace Cyber_Escape.Screens
                     {
                         orbs.Remove(orb);
                     }
+                }
+            } else
+            {
+                if(isAdvancing == false && player.IsMoving == false && difficulty >= 2 && score > 0)
+                {
+                    score -= 1;
                 }
             }
         }
@@ -332,8 +354,8 @@ namespace Cyber_Escape.Screens
                     orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 3f));
                     orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 3.5f));
                     orbs.Add(new Orb(orbTexture, portal, 100f, 2.5f, 4f));
-                    break;
-                case 11:
+
+                    tutorialComplete = true;
                     break;
                 default:
                     break;
@@ -359,6 +381,32 @@ namespace Cyber_Escape.Screens
             }
 
             spriteBatch.Draw(player.CurrentTexture, player.Position, null, player.ShadingColor, player.Rotation, new Vector2(24, 24), player.ScaleFactor, SpriteEffects.None, 0);
+            
+            switch(difficulty)
+            {
+                case 0:
+                    messageStr = "Press 'space' to advance.";
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
+                    break;
+                case 1:
+                    messageStr = "Avoid the red orbs.";
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
+                    break;
+                case 2:
+                    messageStr = "<-- Your score decreases while you remain stationary.";
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
+                    break;
+                default:
+                    break;
+            }
+
+            if(difficulty >= 2)
+            {
+                spriteBatch.DrawString(gameFont, "Score: "+score.ToString(), Vector2.Zero, Color.White);
+            }
 
             spriteBatch.End();
 
