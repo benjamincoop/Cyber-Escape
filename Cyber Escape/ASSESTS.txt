@@ -11,7 +11,7 @@ Game Music:
 	https://opengameart.org/content/cyberpunk-moonlight-sonata, Jordan Pool, user "Joth", CC0
 	
 Sound FX:
-	https://opengameart.org/content/9-sci-fi-computer-sounds-and-beeps, Michel Baradari, CC-BY 3.0
+	https://opengameart.org/content/9-sci-fi-computer-sounds-and-beeps, Michel Baradari, CC BY 3.0
 
 Font:
 	VT323, https://fonts.google.com/specimen/VT323, OFL
