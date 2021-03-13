@@ -1,0 +1,17 @@
+Orb Textures:
+	https://opengameart.org/content/pixel-orbs, user "Flowly", CC0
+	
+Background Texture:
+	https://www.toptal.com/designers/subtlepatterns/dark-mosaic, Toptal Designers, CC BY-SA 3.0
+	
+Main Menu Music:
+	https://opengameart.org/content/loading-screen-loop, Brandon Morris, CC0
+	
+Game Music:
+	https://opengameart.org/content/cyberpunk-moonlight-sonata, Jordan Pool, user "Joth", CC0
+	
+Sound FX:
+	https://opengameart.org/content/9-sci-fi-computer-sounds-and-beeps, Michel Baradari, CC-BY 3.0
+
+Font:
+	VT323, https://fonts.google.com/specimen/VT323, OFL
