@@ -12,6 +12,9 @@ namespace Cyber_Escape
         private GraphicsDeviceManager graphics;
         private readonly ScreenManager screenManager;
 
+        public float SFXVol = 0.25f;
+        public float MusicVol = 0.25f;
+
         public CyberEscape()
         {
             // Initalize game size and other parameters

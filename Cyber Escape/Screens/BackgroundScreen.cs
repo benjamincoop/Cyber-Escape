@@ -53,6 +53,7 @@ namespace Cyber_Escape.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
         {
             base.Update(gameTime, otherScreenHasFocus, false);
+            MediaPlayer.Volume = ((CyberEscape)ScreenManager.Game).MusicVol;
         }
 
         public override void Draw(GameTime gameTime)

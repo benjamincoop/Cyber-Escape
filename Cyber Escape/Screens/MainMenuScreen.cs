@@ -29,7 +29,7 @@ namespace Cyber_Escape.Screens
 
         private void OptionsMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            ScreenManager.AddScreen(new OptionsMenuScreen(), e.PlayerIndex);
+            ScreenManager.AddScreen(new OptionsMenuScreen((CyberEscape)ScreenManager.Game), e.PlayerIndex);
         }
 
         protected override void OnCancel(PlayerIndex playerIndex)

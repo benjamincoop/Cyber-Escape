@@ -94,6 +94,8 @@ namespace Cyber_Escape.Screens
 
             music = content.Load<Song>("GameMusic");
             MediaPlayer.IsRepeating = true;
+            MediaPlayer.Volume = ((CyberEscape)ScreenManager.Game).MusicVol;
+            SoundEffect.MasterVolume = ((CyberEscape)ScreenManager.Game).SFXVol;
             MediaPlayer.Play(music);
 
             advanceSFX = content.Load<SoundEffect>("playerSFX");
