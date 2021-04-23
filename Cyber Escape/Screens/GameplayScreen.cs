@@ -19,7 +19,9 @@ namespace Cyber_Escape.Screens
         private readonly InputAction pauseAction;
         private readonly InputAction advanceAction;
         private Random random = new Random();
+        private int highScore = 0;
 
+        private Texture2D backgroundTexture;
         private Texture2D[] portalTextures;
         private List<Portal> portals = new List<Portal>();
         private const int numPortals = 2;
@@ -46,10 +48,12 @@ namespace Cyber_Escape.Screens
         private int score = 0;
         private bool gameOver = false;
 
-        public GameplayScreen()
+        public GameplayScreen(int hiscore)
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
+
+            highScore = hiscore;
 
             pauseAction = new InputAction(
                 new[] { Buttons.Start, Buttons.Back },
@@ -64,6 +68,8 @@ namespace Cyber_Escape.Screens
         public override void Activate()
         {
             if (content == null) content = new ContentManager(ScreenManager.Game.Services, "Content");
+
+            backgroundTexture = content.Load<Texture2D>("MainMenuBG");
 
             portalTextures = new Texture2D[]
             {
@@ -142,8 +148,12 @@ namespace Cyber_Escape.Screens
             {
                 if (gameOver)
                 {
+                    if(score > highScore)
+                    {
+                        highScore = score;
+                    }
                     ExitScreen();
-                    LoadingScreen.Load(ScreenManager, true, 0, new GameplayScreen());
+                    LoadingScreen.Load(ScreenManager, true, 0, new GameplayScreen(highScore));
                 }
 
                 foreach (Portal portal in portals) portal.Update();
@@ -396,10 +406,15 @@ namespace Cyber_Escape.Screens
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
 
             var spriteBatch = ScreenManager.SpriteBatch;
+            var viewport = ScreenManager.GraphicsDevice.Viewport;
+            var fullscreen = new Rectangle(0, 0, viewport.Width, viewport.Height);
 
             spriteBatch.Begin();
 
-            foreach(Portal portal in portals)
+            spriteBatch.Draw(backgroundTexture, fullscreen,
+                new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
+
+            foreach (Portal portal in portals)
             {
                 spriteBatch.Draw(portal.CurrentTexture, portal.Position, null, portal.ShadingColor, portal.Rotation, new Vector2(64, 64), portal.ScaleFactor, SpriteEffects.None, 0);
             }
@@ -410,22 +425,26 @@ namespace Cyber_Escape.Screens
             }
 
             spriteBatch.Draw(player.CurrentTexture, player.Position, null, player.ShadingColor, player.Rotation, new Vector2(24, 24), player.ScaleFactor, SpriteEffects.None, 0);
-            
-            switch(difficulty)
+
+            messageStr = "High Score: " + highScore.ToString();
+            messagePos = new Vector2(Constants.GAME_WIDTH - (gameFont.MeasureString(messageStr).X), 0);
+            spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
+
+            switch (difficulty)
             {
                 case 0:
                     messageStr = "Press 'space' to advance.";
-                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), Constants.GAME_HEIGHT / 2 - (gameFont.MeasureString(messageStr).Y / 2));
                     spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
                     break;
                 case 1:
                     messageStr = "Avoid the red orbs.";
-                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), Constants.GAME_HEIGHT / 2 - (gameFont.MeasureString(messageStr).Y / 2));
                     spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
                     break;
                 case 2:
-                    messageStr = "<-- Your score decreases while you remain stationary.";
-                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), 0);
+                    messageStr = "Your score decreases while you remain stationary.";
+                    messagePos = new Vector2(Constants.GAME_WIDTH / 2 - (gameFont.MeasureString(messageStr).X / 2), Constants.GAME_HEIGHT / 2 - (gameFont.MeasureString(messageStr).Y / 2));
                     spriteBatch.DrawString(gameFont, messageStr, messagePos, Color.White);
                     break;
                 default:
