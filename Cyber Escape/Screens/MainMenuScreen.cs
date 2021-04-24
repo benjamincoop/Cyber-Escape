@@ -24,7 +24,7 @@ namespace Cyber_Escape.Screens
 
         private void PlayGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(0));
+            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new GameplayScreen(0, ScreenManager.Game));
         }
 
         private void OptionsMenuEntrySelected(object sender, PlayerIndexEventArgs e)

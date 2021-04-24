@@ -14,6 +14,7 @@ namespace Cyber_Escape.Screens
     public class GameplayScreen : GameScreen
     {
         private ContentManager content;
+        private Game game;
 
         private float pauseAlpha;
         private readonly InputAction pauseAction;
@@ -48,12 +49,14 @@ namespace Cyber_Escape.Screens
         private int score = 0;
         private bool gameOver = false;
 
-        public GameplayScreen(int hiscore)
+        public GameplayScreen(int hiscore, Game game)
         {
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
             highScore = hiscore;
+
+            this.game = game;
 
             pauseAction = new InputAction(
                 new[] { Buttons.Start, Buttons.Back },
@@ -107,7 +110,7 @@ namespace Cyber_Escape.Screens
             advanceSFX = content.Load<SoundEffect>("playerSFX");
             failSFX = content.Load<SoundEffect>("failSFX");
 
-            player = new Player(playerTexture, new Vector2(Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT));
+            player = new Player(playerTexture, new Vector2(Constants.GAME_WIDTH / 2, Constants.GAME_HEIGHT), game);
 
             gameFont = content.Load<SpriteFont>("gamefont");
 
@@ -153,7 +156,7 @@ namespace Cyber_Escape.Screens
                         highScore = score;
                     }
                     ExitScreen();
-                    LoadingScreen.Load(ScreenManager, true, 0, new GameplayScreen(highScore));
+                    LoadingScreen.Load(ScreenManager, true, 0, new GameplayScreen(highScore, game));
                 }
 
                 foreach (Portal portal in portals) portal.Update();
@@ -162,6 +165,8 @@ namespace Cyber_Escape.Screens
                     orb.Update(gameTime);
                     if (orb.bounds.CollidesWith(player.bounds) && gameOver == false)
                     {
+                        player.trailingFX.Enabled = false;
+                        player.trailingFX.Visible = false;
                         failSFX.Play();
                         gameOver = true;
                         ScreenManager.AddScreen(new MessageBoxScreen("Game over!\nPress 'enter' to restart.", false), ControllingPlayer);
@@ -174,6 +179,7 @@ namespace Cyber_Escape.Screens
                 if (isAdvancing && player.IsMoving == false)
                 {
                     isAdvancing = false;
+                    player.trailingFX.Visible = false;
                     score += 100;
 
                     // deactivate portal
@@ -247,6 +253,7 @@ namespace Cyber_Escape.Screens
                 if(isAdvancing == false && portals[portals.Count - 1].IsSliding == false)
                 {
                     isAdvancing = true;
+                    this.player.trailingFX.Visible = true;
                     this.player.Advance(portals[portals.Count - 1], 2000f);
                     advanceSFX.Play();
                 }

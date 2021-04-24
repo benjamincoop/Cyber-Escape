@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Cyber_Escape
 {
-    class Player : Sprite
+    class Player : Sprite, IParticleEmitter
     {
         public BoundingCircle bounds;
 
@@ -15,13 +15,20 @@ namespace Cyber_Escape
         private Vector2 moveDirection;
         private float moveSpeed;
 
+        // used by particle system
+        public Vector2 Velocity { get; set; }
+        public PixieParticleSystem trailingFX;
+
         Portal portal;
 
-        public Player(Texture2D texture, Vector2 position)
+        public Player(Texture2D texture, Vector2 position, Game game)
         {
             CurrentTexture = texture;
             Position = position;
             bounds = new BoundingCircle(Position, 16f);
+
+            trailingFX = new PixieParticleSystem(game, this);
+            game.Components.Add(trailingFX);
         }
 
         public void Update(GameTime gameTime)
